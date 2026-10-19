@@ -496,6 +496,26 @@ describe("openrouter video generation provider", () => {
     expect(oversized.release).toHaveBeenCalledOnce();
   });
 
+  it("routes stale OpenRouter base URLs to the /api/v1 video endpoints", async () => {
+    const legacyConfig = {
+      models: { providers: { openrouter: { baseUrl: "https://openrouter.ai/v1" } } },
+    } as never;
+    fetchWithTimeoutGuardedMock.mockResolvedValueOnce(releasedJson({ data: [] }));
+    postJsonRequestMock.mockRejectedValueOnce(new Error("submit captured"));
+
+    await listOpenRouterVideoModelCatalog(catalogContext(legacyConfig, "key", "key"));
+    await expect(generateVideo({ prompt: "A tide pool", cfg: legacyConfig })).rejects.toThrow(
+      "submit captured",
+    );
+
+    expectOpenRouterFetchCall(
+      0,
+      "https://openrouter.ai/api/v1/videos/models",
+      "openrouter-video-models",
+    );
+    expect(requirePostJsonParams().url).toBe("https://openrouter.ai/api/v1/videos");
+  });
+
   it("skips live OpenRouter video catalog discovery without an API key", async () => {
     await expect(
       listOpenRouterVideoModelCatalog({

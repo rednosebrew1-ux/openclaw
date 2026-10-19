@@ -24,6 +24,27 @@ function firstPostJsonRequest(): { body?: unknown; headers?: Headers } {
 }
 
 describe("openrouter media understanding provider", () => {
+  it("routes stale OpenRouter base URLs to the /api/v1 transcription endpoint", async () => {
+    postJsonRequestMock.mockResolvedValue({
+      response: new Response(JSON.stringify({ text: "hello" }), { status: 200 }),
+      release: vi.fn(async () => {}),
+    });
+
+    await transcribeOpenRouterAudio({
+      buffer: Buffer.from("audio-bytes"),
+      fileName: "voice.ogg",
+      mime: "audio/ogg",
+      apiKey: "sk-openrouter",
+      baseUrl: "https://openrouter.ai/v1/",
+      timeoutMs: 12_000,
+      fetchFn: fetch,
+    });
+
+    expect(firstPostJsonRequest()).toMatchObject({
+      url: "https://openrouter.ai/api/v1/audio/transcriptions",
+    });
+  });
+
   it("sends JSON STT payload to OpenRouter transcriptions endpoint", async () => {
     const release = vi.fn(async () => {});
     postJsonRequestMock.mockResolvedValue({

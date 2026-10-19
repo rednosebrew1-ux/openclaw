@@ -55,12 +55,13 @@ export function applyCompletionsReasoningAndRouting(
       params.reasoning_effort = nativeEffort;
     }
   }
-  if (!direct) {
-    return;
+  // Managed compat defaults routing to `{}`; only configured preferences reach the wire.
+  if (compat.openRouterRouting && Object.keys(compat.openRouterRouting).length > 0) {
+    params.provider = compat.openRouterRouting;
   }
 
-  if (compat.openRouterRouting) {
-    params.provider = compat.openRouterRouting;
+  if (!direct) {
+    return;
   }
 
   if (model.baseUrl.includes("ai-gateway.vercel.sh") && model.compat?.vercelGatewayRouting) {

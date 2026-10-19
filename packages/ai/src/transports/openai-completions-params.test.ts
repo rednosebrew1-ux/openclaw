@@ -846,3 +846,19 @@ describe("OpenAI completions compatibility and tools", () => {
     }
   });
 });
+
+describe("OpenRouter routing compat", () => {
+  it("sends configured routing on managed agent requests", () => {
+    const routing = { only: ["anthropic"], allow_fallbacks: false };
+    const openrouter = {
+      provider: "openrouter",
+      baseUrl: "https://openrouter.ai/api/v1",
+      id: "anthropic/claude-sonnet-4.5",
+    };
+
+    expect(request({ ...openrouter, compat: { openRouterRouting: routing } }).provider).toEqual(
+      routing,
+    );
+    expect(request(openrouter)).not.toHaveProperty("provider");
+  });
+});

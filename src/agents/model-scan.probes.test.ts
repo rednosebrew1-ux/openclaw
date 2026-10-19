@@ -11,7 +11,9 @@ vi.mock("@openclaw/ai", () => ({
 vi.mock("@openclaw/ai/providers", () => ({ registerBuiltInApiProviders: vi.fn() }));
 
 const fetchImpl = withFetchPreconnect(async () =>
-  Response.json({ data: [{ id: "example/vision:free", modality: "text+image" }] }),
+  Response.json({
+    data: [{ id: "example/vision:free", architecture: { modality: "text+image->text" } }],
+  }),
 );
 
 describe("OpenRouter model probes", () => {

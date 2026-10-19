@@ -23,7 +23,7 @@ import type {
   VideoGenerationProviderCapabilities,
   VideoGenerationResolution,
 } from "openclaw/plugin-sdk/video-generation";
-import { OPENROUTER_BASE_URL } from "./provider-catalog.js";
+import { normalizeOpenRouterBaseUrl, OPENROUTER_BASE_URL } from "./provider-catalog.js";
 import { fetchOpenRouterVideoGet } from "./video-http.js";
 
 const DEFAULT_HTTP_TIMEOUT_MS = 60_000;
@@ -188,7 +188,7 @@ async function fetchOpenRouterVideoModels(params: {
     resolveProviderHttpRequestConfig({
       provider: "openrouter",
       capability: "video",
-      baseUrl: params.baseUrl,
+      baseUrl: normalizeOpenRouterBaseUrl(params.baseUrl) ?? params.baseUrl,
       defaultBaseUrl: OPENROUTER_BASE_URL,
       defaultHeaders: { Authorization: `Bearer ${params.apiKey}` },
       request,
