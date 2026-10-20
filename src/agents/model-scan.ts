@@ -111,7 +111,9 @@ function normalizeCreatedAtMs(value: unknown): number | null {
 }
 
 function parseModality(modality: string | null): Array<"text" | "image"> {
-  const parts = normalizeLowercaseStringOrEmpty(modality).split(/[^a-z]+/);
+  // OpenRouter writes `input->output` (e.g. `text->image`); only inputs decide probes.
+  const [input = ""] = normalizeLowercaseStringOrEmpty(modality).split("->", 1);
+  const parts = input.split(/[^a-z]+/);
   return parts.includes("image") ? ["text", "image"] : ["text"];
 }
 
@@ -204,6 +206,8 @@ async function fetchOpenRouterModels(
               null;
 
             const supportedParameters = normalizeTrimmedStringList(obj.supported_parameters);
+            // The live catalog nests modality under `architecture` and dates rows with `created`.
+            const architecture = asOptionalRecord(obj.architecture);
 
             return {
               id,
@@ -212,9 +216,12 @@ async function fetchOpenRouterModels(
               maxCompletionTokens,
               supportedParametersCount: supportedParameters.length,
               supportsToolsMeta: supportedParameters.includes("tools"),
-              modality: normalizeOptionalString(obj.modality) ?? null,
+              modality:
+                normalizeOptionalString(architecture?.modality) ??
+                normalizeOptionalString(obj.modality) ??
+                null,
               inferredParamB: inferParamBFromIdOrName(`${id} ${name}`),
-              createdAtMs: normalizeCreatedAtMs(obj.created_at),
+              createdAtMs: normalizeCreatedAtMs(obj.created ?? obj.created_at),
               pricing: parseOpenRouterPricing(obj.pricing),
             } satisfies OpenRouterModelMeta;
           })
