@@ -42,6 +42,16 @@ function inputAudio(data: string, format: string) {
   return { data: Buffer.from(data).toString("base64"), format };
 }
 
+it("routes stale OpenRouter base URLs to the /api/v1 transcription endpoint", async () => {
+  respond(JSON.stringify({ text: "hello" }));
+
+  await transcribe({ baseUrl: "https://openrouter.ai/v1/" });
+
+  expect(firstPostJsonRequest()).toMatchObject({
+    url: "https://openrouter.ai/api/v1/audio/transcriptions",
+  });
+});
+
 it("sends JSON STT payload to OpenRouter transcriptions endpoint", async () => {
   const release = respond(JSON.stringify({ text: "hello world" }));
   const result = await transcribe({

@@ -580,10 +580,11 @@ export function buildOpenAICompletionsRequest(
       params.reasoning_effort = nativeEffort;
     }
   }
+  // Managed compat defaults routing to `{}`; only configured preferences reach the wire.
+  if (compat.openRouterRouting && Object.keys(compat.openRouterRouting).length > 0) {
+    params.provider = compat.openRouterRouting;
+  }
   if (direct) {
-    if (compat.openRouterRouting) {
-      params.provider = compat.openRouterRouting;
-    }
     if (model.baseUrl.includes("ai-gateway.vercel.sh") && model.compat?.vercelGatewayRouting) {
       const routing = model.compat.vercelGatewayRouting;
       if (routing.only || routing.order) {

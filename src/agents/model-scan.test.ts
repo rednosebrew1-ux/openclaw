@@ -86,6 +86,33 @@ describe("scanOpenRouterModels", () => {
     expect(result).toMatchObject({ contextLength: 16_384, maxCompletionTokens: 4096 });
   });
 
+  it("reads modality and creation time from the live OpenRouter catalog shape", async () => {
+    const now = Date.UTC(2026, 0, 31);
+    vi.spyOn(Date, "now").mockReturnValue(now);
+    const createdSeconds = (daysAgo: number) => Math.floor((now - daysAgo * 86_400_000) / 1000);
+    const results = await scan(
+      [
+        {
+          id: "acme/fresh-vision:free",
+          architecture: { modality: "text+image->text", input_modalities: ["text", "image"] },
+          created: createdSeconds(3),
+        },
+        {
+          id: "acme/stale:free",
+          architecture: { modality: "text->text" },
+          created: createdSeconds(90),
+        },
+      ],
+      { maxAgeDays: 30 },
+    );
+
+    expect(results.map((entry) => entry.id)).toEqual(["acme/fresh-vision:free"]);
+    expect(results[0]).toMatchObject({
+      modality: "text+image->text",
+      createdAtMs: createdSeconds(3) * 1000,
+    });
+  });
+
   it("drops out-of-range OpenRouter created_at timestamps", async () => {
     const [result] = await scan([
       { id: "acme/free-invalid-created:free", created_at: 8_640_000_000_000_001 },
