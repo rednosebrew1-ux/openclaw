@@ -396,11 +396,7 @@ describe("openrouter video generation provider", () => {
       "submit captured",
     );
 
-    expectOpenRouterFetchCall(
-      0,
-      "https://openrouter.ai/api/v1/videos/models",
-      "openrouter-video-models",
-    );
+    expectOpenRouterFetchCall(0, "https://openrouter.ai/api/v1/videos/models", "models");
     expect(requirePostJsonParams().url).toBe("https://openrouter.ai/api/v1/videos");
   });
 
