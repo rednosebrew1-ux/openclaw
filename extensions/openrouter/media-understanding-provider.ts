@@ -7,7 +7,7 @@ import {
   resolveProviderHttpRequestConfig,
 } from "openclaw/plugin-sdk/provider-http";
 import { asFiniteNumber } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { OPENROUTER_BASE_URL } from "./provider-catalog.js";
+import { normalizeOpenRouterBaseUrl, OPENROUTER_BASE_URL } from "./provider-catalog.js";
 
 const DEFAULT_OPENROUTER_AUDIO_TRANSCRIPTION_MODEL = "openai/whisper-large-v3-turbo";
 const SUPPORTED_AUDIO_FORMATS = new Set(["wav", "mp3", "flac", "m4a", "ogg", "webm", "aac"]);
@@ -67,7 +67,7 @@ export const openrouterMediaUnderstandingProvider: MediaUnderstandingProvider = 
     const fetchFn = params.fetchFn ?? fetch;
     const { baseUrl, allowPrivateNetwork, headers, dispatcherPolicy } =
       resolveProviderHttpRequestConfig({
-        baseUrl: params.baseUrl,
+        baseUrl: normalizeOpenRouterBaseUrl(params.baseUrl) ?? params.baseUrl,
         defaultBaseUrl: OPENROUTER_BASE_URL,
         headers: params.headers,
         request: params.request,
